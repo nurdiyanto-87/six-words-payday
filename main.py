@@ -13,6 +13,7 @@ Pure Python standard library only.
 """
 
 import os
+import sys
 
 STORY = "First paycheck cleared, I bought sleep."
 
@@ -38,8 +39,26 @@ def validate_story(story: str) -> str:
     return story
 
 
+def report(story: str) -> None:
+    """Print a validation report for the story to stderr.
+
+    Runs the same gate as validate_story, then reports the word count
+    and character count so a run leaves an auditable trace before the
+    entry file is written. Kept on stderr so /output/entry.txt still
+    contains only the story text.
+    """
+    validated = validate_story(story)
+    words = validated.split()
+    print(
+        f"validated: {len(words)} words, {len(validated)} chars",
+        file=sys.stderr,
+    )
+    print(f"story: {validated!r}", file=sys.stderr)
+
+
 def main() -> None:
     story = validate_story(STORY)
+    report(story)
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8") as f:
         f.write(story)
